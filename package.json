@@ -5,7 +5,7 @@
   "main": "./src/index.ts",
   "scripts": {
     "start": "npx ts-node ./src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest ./tests/logic.test.ts \n"
   },
   "keywords": [],
   "author": "",
