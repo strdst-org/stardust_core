@@ -51,217 +51,136 @@ export function executeLogic() {
     }
 
     /**
-     * check if current node is allow button
-     * @param node - the node which could be the accept button
+     * Check if the node conforms with multiple rules about children, visibility and size
+     * @param node - the node to be checked
+     * @return boolean - return true if node has a valid structure
      */
-    function checkAllowButton(node) {
+    const isValidStructure = (node) => {
+        return node.getElementsByTagName && // Node needs to have this function
+                node.getElementsByTagName('div').length === 0 && // No divs as children as this element could be clicked
+                node.offsetParent && // Node must be visible
+                !hasChildrenButtons(node) && // Node should not have any buttons or links as children
+                !node.offsetParent.isEqualNode(document.body) && // Immediate parent should not be the body
+                isClickable(node) && // Node must be clickable
+                window.innerWidth >= node.getBoundingClientRect().x && // Node's width should not exceed window
+                window.innerHeight >= node.getBoundingClientRect().y; // Node's height should not exceed window
+    }
+
+    /**
+     * Checks whether the node contains text which is common for a cookie pop-up button
+     * @param node - The node to be checked
+     * @return boolean - return true if the node contains a valid allow button text
+     */
+    const isValidText = (node) => {
         //Options for accept button in different languages
-        let possibleOptions = [
-            'accept',
-            'agree',
-            'ok',
-            'allow',
-            'continue',
-            'yes',
-            'consent',
-            'got',
-            'happy',
-            'okay',
-            'close',
-            'sounds',
-            'understood',
-            'promise', //english
-            'einverstanden',
-            'akzeptiere',
-            'akzeptieren',
-            'erlauben',
-            'zulassen',
-            'zustimmen',
-            'ja',
-            'stimme',
-            'auswählen',
-            'verstanden',
-            'schliessen',
-            'fortfahren', //german
-            'aceptar',
-            'acordar',
-            'convenir',
-            'aprobar',
-            'consentir',
-            'permitir',
-            'acepto',
-            'permito', //spanish
-            "j'accepte",
-            "j'autorise",
-            'autoriser',
-            'accepter', //french
-            'accetto',
-            'accettare',
-            'permettere',
-            'autorizzo',
-            'permitto',
-            'accetta', //italian
-            'aceito', //portuguese
-            'nõustun',
-            'luba', //estonian
-            'aksepterer', //norwegian
-            'akceptovat', //czech
-            'akkoord',
+        let possibleOptions: Array<Array<string>> = [
+            ['accept'],
+            ['agree'],
+            ['ok'],
+            ['allow'],
+            ['continue'],
+            ['yes'],
+            ['consent', 'i'],
+            ['got', 'it'],
+            ['happy'],
+            ['okay'],
+            ['close'],
+            ['sounds', 'good'],
+            ['understood', 'i'],
+            ['promise', 'i'], //english
+            ['einverstanden'],
+            ['akzeptiere'],
+            ['akzeptieren'],
+            ['erlauben'],
+            ['zulassen'],
+            ['zustimmen'],
+            ['ja', 'ich'],
+            ['stimme'],
+            ['auswählen'],
+            ['verstanden'],
+            ['schliessen'],
+            ['fortfahren'], //german
+            ['aceptar'],
+            ['acordar'],
+            ['convenir'],
+            ['aprobar'],
+            ['consentir'],
+            ['permitir'],
+            ['acepto'],
+            ['permito'], //spanish
+            ["j'accepte"],
+            ["j'autorise"],
+            ['autoriser'],
+            ['accepter'], //french
+            ['accetto'],
+            ['accettare'],
+            ['permettere'],
+            ['autorizzo'],
+            ['permitto'],
+            ['accetta'], //italian
+            ['aceito'], //portuguese
+            ['nõustun'],
+            ['luba'], //estonian
+            ['aksepterer'], //norwegian
+            ['akceptovat'], //czech
+            ['akkoord'],
         ]; //Dutch
 
-        //Check if node is visible
-        let offset = node.offsetParent;
+        // Text on the node
+        let text = node.innerText;
 
-        if (node.getElementsByTagName) {
-            if (node.getElementsByTagName('div').length < 1) {
-                if (offset && !hasChildrenButtons(node)) {
-                    if (!offset.isEqualNode(document.body)) {
-                        let text = node.innerText;
+        // Text pre-processing
+        text = text.toLowerCase();
+        text = text.replace(',', '');
+        text = text.replace('.', '');
+        text = text.replace('!', '');
 
-                        if (isClickable(node)) {
-                            text = text.toLowerCase();
-                            text = text.replace(',', '');
-                            text = text.replace('.', '');
-                            text = text.replace('!', '');
+        //Split the text into words
+        let words = text.split(/[\s&]+/);
 
-                            //Split the text into it's words
-                            text = text.split(/[\s&]+/);
+        // Check if the text contains any of the options and the number of words is less than seven
+        return possibleOptions.some((option) => option.every((word) => words.includes(word))) &&
+            words.length < 7;
+    }
 
-                            if (text.length < 7) {
-                                for (let option of possibleOptions) {
-                                    if (text.includes(option)) {
-                                        if (
-                                            option === 'consent' &&
-                                            !text.includes('i')
-                                        ) {
-                                            continue;
-                                        }
+    /**
+     * Check if the text surrounding the button is a valid pop-up by using common keywords
+     * @param node - the node that might be the correct button
+     * @return boolean - return true if all the criteria are met
+     */
+    const isValidPopupText = (node) => {
 
-                                        if (
-                                            option === 'understood' &&
-                                            !text.includes('i')
-                                        ) {
-                                            continue;
-                                        }
-
-                                        if (
-                                            option === 'promise' &&
-                                            !text.includes('i')
-                                        ) {
-                                            continue;
-                                        }
-
-                                        if (
-                                            option === 'ja' &&
-                                            !text.includes('ich')
-                                        ) {
-                                            continue;
-                                        }
-
-                                        if (
-                                            option === 'got' &&
-                                            !text.includes('it')
-                                        ) {
-                                            continue;
-                                        }
-
-                                        if (
-                                            option === 'sounds' &&
-                                            !text.includes('good')
-                                        ) {
-                                            continue;
-                                        }
-
-                                        if (option === 'close' && text.length > 2) {
-                                            continue;
-                                        }
-
-                                        let yCoordinate =
-                                            node.getBoundingClientRect().y;
-                                        let xCoordinate =
-                                            node.getBoundingClientRect().x;
-
-                                        if (
-                                            window.innerWidth >= xCoordinate &&
-                                            window.innerHeight >= yCoordinate
-                                        ) {
-                                            let innerHTML =
-                                                offset.innerHTML.toLowerCase();
-                                            if (
-                                                innerHTML.indexOf('cookie') !==
-                                                -1 ||
-                                                innerHTML.indexOf('gdpr') !== -1 ||
-                                                innerHTML.indexOf('küpsiste') !==
-                                                -1 ||
-                                                innerHTML.indexOf('consent') !== -1
-                                            ) {
-                                                console.log(
-                                                    'Found pop-up - standard way'
-                                                );
-                                                return true;
-                                            } else {
-                                                if (
-                                                    offset.getElementsByTagName('*')
-                                                        .length > 2
-                                                ) {
-                                                    if (
-                                                        node.id !==
-                                                        'wt-cli-privacy-save-btn'
-                                                    ) {
-                                                        offset =
-                                                            offset.offsetParent;
-                                                        if (offset) {
-                                                            if (
-                                                                offset.id !==
-                                                                'container' &&
-                                                                !offset.isEqualNode(
-                                                                    document.body
-                                                                )
-                                                            ) {
-                                                                if (
-                                                                    offset.offsetWidth <
-                                                                    window.innerWidth ||
-                                                                    offset.offsetHeight <
-                                                                    window.innerHeight
-                                                                ) {
-                                                                    innerHTML =
-                                                                        offset.innerHTML.toLowerCase();
-                                                                    if (
-                                                                        innerHTML.indexOf(
-                                                                            'cookie'
-                                                                        ) !== -1 ||
-                                                                        innerHTML.indexOf(
-                                                                            'gdpr'
-                                                                        ) !== -1 ||
-                                                                        innerHTML.indexOf(
-                                                                            'küpsiste'
-                                                                        ) !== -1 ||
-                                                                        innerHTML.indexOf(
-                                                                            'consent'
-                                                                        ) !== -1
-                                                                    ) {
-                                                                        console.log(
-                                                                            'Found pop-up - advanced way'
-                                                                        );
-                                                                        return true;
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        //Check for keywords in the pop-up text
+        const validKeyWords = (text) => {
+            return text.includes("cookie") ||
+                text.includes("gdpr") ||
+                text.includes("küpsiste") || // Estonian word for cookie
+                text.includes("consent");
         }
 
-        return false;
+        return validKeyWords(node.offsetParent.innerHTML.toLowerCase()) || // Check for the immediate offset text
+            (
+                node.offsetParent.getElementsByTagName('*').length > 2 &&
+                node.id !== 'wt-cli.privacy-save-btn' &&
+                node.offsetParent.offsetParent &&
+                node.offsetParent.offsetParent.id !== 'container' &&
+                !node.offsetParent.offsetParent.isEqualNode(document.body) &&
+                (
+                    node.offsetParent.offsetParent.offsetWidth < window.innerWidth ||
+                    node.offsetParent.offsetParent.offsetHeight < window.innerHeight
+                ) &&
+
+                validKeyWords(node.offsetParent.offsetParent.innerHTML.toLowerCase())
+            )
+    }
+
+    /**
+     * check if current node is the allow button
+     * @param node - the node which could be the accept button
+     * @return boolean - return true if the given node is the allow button to be pressed
+     */
+    const isAllowButton = (node) => {
+        return isValidStructure(node) && isValidText(node) && isValidPopupText(node);
     }
 
     // Only resolve the promise if a pop-up has been closed
@@ -271,9 +190,15 @@ export function executeLogic() {
         // Click and return the element if true and return false otherwise
         const isPopup = (node) => {
             let elements = node.getElementsByTagName("*");
+            let array: Array<Element> = Array.from(elements);
+
+            let shadowRoots = array.filter((element) => element.shadowRoot);
+
+            let shadows = Array.from(shadowRoots.map((el) => el.shadowRoot.querySelectorAll("*"))).flat();
+            array.push.apply(shadows);
 
             for (let element of elements) {
-                if (checkAllowButton(element)) {
+                if (isAllowButton(element)) {
                     element.click();
                     return element;
                 }
