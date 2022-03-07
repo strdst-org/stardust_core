@@ -5,6 +5,10 @@
  * All rights reserved.
  */
 
+/**
+ * Find the pop-up button in the DOM and react to change in the DOM
+ * @return - Promise that only resolves if a pop-up is closed
+ */
 export function executeLogic() {
 
     /**
@@ -260,41 +264,59 @@ export function executeLogic() {
         return false;
     }
 
-    /**
-     * Search through whole dom and click accept button
-     * @param node - the starting node of the DOM - document.body
-     * @param callback - function to know when a button has been clicked
-     */
-    function searchElements(node, callback) {
-        if (checkAllowButton(node)) {
-            node.click();
-            setTimeout(function () {
-                if (node.offsetParent) {
-                    node.click();
+    // Only resolve the promise if a pop-up has been closed
+    return new Promise(resolve => {
+
+        // Check if any child nodes of the given nodes is a pop-up button
+        // Click and return the element if true and return false otherwise
+        const isPopup = (node) => {
+            let elements = node.getElementsByTagName("*");
+
+            for (let element of elements) {
+                if (checkAllowButton(element)) {
+                    element.click();
+                    return element;
                 }
-            }, 1000);
-            callback(node.textContent);
-            return;
-        }
-        //Check for shadow root as well
-        let child = node.firstChild;
+            }
 
-        if (!child) {
-            node = node.shadowRoot;
-        } else {
-            node = child;
+            return false;
         }
-        while (node) {
-            searchElements(node, callback);
-            node = node.nextSibling;
-        }
-    }
 
-    searchElements(document.body, (node) => {
-        return node;
+        // Observe every change in the DOM
+        const config = { attributes: true, childList: true, subtree: true };
+
+        // Use an observer to handle pop-ups which appear with a delay
+        let observer = new MutationObserver(mutations => {
+
+            for (let mutation of mutations) {
+
+                // Check every node that was added
+                mutation.addedNodes.forEach((node) => {
+                    let el = isPopup(node);
+                    if (el) {
+                        let element = el as HTMLElement;
+                        resolve(element.outerHTML); // Return a textual representation of the pop-up for testing
+                    }
+                });
+            }
+        });
+
+        // Execute the main logic on the whole body once
+        let el = isPopup(document.body);
+        if (el) {
+            let element = el as HTMLElement;
+            resolve(element.outerHTML); // Return a textual representation of the pop-up for testing
+        }
+
+        // Observe the document body about any changes
+        observer.observe(document.body, config);
     });
 }
 
+/**
+ * Checks for any active cookie pop-up providers and closes them
+ * @return - either the search term for the provider (id or class name) or null if no provider was found
+ */
 export function checkProvider() {
 
     let elementSelectors = ['#onetrust-accept-btn-handler', '#accept-recommended-btn-handler', '#truste-consent-button',
