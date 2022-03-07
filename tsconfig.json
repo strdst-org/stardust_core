@@ -2,6 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "lib": ["es2015", "dom"],
+    "target": "ESNext"
     // ...
   },
   "include": [
