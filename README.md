@@ -1,4 +1,6 @@
-# stardust_core
+# Cookie Cutter core
+=================
+This repository contains the generic Cookie Cutter code that's shared between platforms. This repository is __not designed to be used directly__, but instead to serve as a dependency for [Stardust_Cookie_Cutter](https://github.com/strdst-org/Stardust_Cookie_Cutter) and [Stardust_Cookie_Cutter_Safari](https://github.com/strdst-org/Stardust_Cookie_Cutter_Safari).
 
 ## 1. Installation
 Run `npm install`
