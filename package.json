@@ -1,5 +1,5 @@
 {
-  "name": "stardust_core",
+  "name": "stardust_cookie_cutter_core",
   "version": "1.0.0",
   "description": "",
   "main": "./src/index.ts",
