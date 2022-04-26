@@ -1,13 +1,14 @@
 # Stardust Cookie Cutter core library
 
-This repository contains the logic that powers the [Stardust Cookie Cutter](https://github.com/strdst-org/stardust_cookie_cutter.git).
+This repository contains the logic that powers the [Stardust Cookie Cutter](https://github.com/strdst-org/stardust_cookie_cutter.git). 
 
----
+However, the funcitonality here is not complete and the current live Chromium/Firefox extensions don’t use this repo (as of April 2022). 
+The full flow of the logic will be to first accept all cookies and then delete the cookies that are in categories that are disabled by the user. The latter part is still missing and will be added by around June, 2022. 
+
+Meanwhile please feel free to help improve the pop-up detection.
 
 
 # Overview
-
----
 
 The logic is located in `./src/logic.ts`. There are two main functions available: `checkProvider()` and `executeLogic()`.
 The first one contains pre-defined element ids and class names for commonly used cookie pop-ups. This ensures faster closing times and that the pop-up is correctly closed on popular websites.
@@ -18,8 +19,6 @@ uses [Puppeteer](https://developers.google.com/web/tools/puppeteer) to inject th
 show the execution in a Chromium-based browser window.
 
 # Getting Started
-
----
 
 ## 1. Installation
 
