@@ -3,7 +3,7 @@
 This repository contains the logic that powers the [Stardust Cookie Cutter](https://github.com/strdst-org/stardust_cookie_cutter.git). 
 
 However, the funcitonality here is not complete and the current live Chromium/Firefox extensions don’t use this repo (as of April 2022). 
-The full flow of the logic will be to first accept all cookies and then delete the cookies that are in categories that are disabled by the user. The latter part is still missing and will be added by around June, 2022. 
+The full flow of the logic will be to first accept all cookies and then delete the cookies that are in categories that are disabled by the user. The latter part is still missing from this repo and will be added by around June, 2022. The live extension does have all the functionality.
 
 Meanwhile please feel free to help improve the pop-up detection.
 
